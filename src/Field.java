@@ -4,7 +4,7 @@ public class Field {
 	private int positionX;
 	private int positionY;
 	
-	private int counter;
+	private int counter=0;
 	private int type=0;  //:INFO 1-sciana, 0- puste, -1-koniec
 	
 	Field(int positionX, int positionY,int counter,int type){
@@ -41,6 +41,9 @@ public class Field {
 		this.type=type;
 	}
 	
+	void iterateCounter(){
+		this.counter++;
+	}
 	
 	@Override
 	public String toString(){
