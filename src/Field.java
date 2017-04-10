@@ -5,9 +5,9 @@ public class Field {
 	private int positionY;
 	
 	private int counter;
-	private boolean type=true;  //:INFO false-sciana
+	private int type=0;  //:INFO 1-sciana, 0- puste, -1-koniec
 	
-	Field(int positionX, int positionY,int counter,boolean type){
+	Field(int positionX, int positionY,int counter,int type){
 		this.positionX=positionX;
 		this.positionY=positionY;
 		this.counter=counter;
@@ -24,7 +24,7 @@ public class Field {
 	int getCounter(){
 		return this.counter;
 	}
-	boolean getType(){
+	int getType(){
 		return this.type;
 	}
 	
@@ -37,14 +37,18 @@ public class Field {
 	void setCounter(int counter){
 		this.counter=counter;
 	}
-	void setType(boolean type){
+	void setType(int type){
 		this.type=type;
 	}
 	
 	
 	@Override
 	public String toString(){
-		if(this.type==true)return "x:"+this.positionX+",y:"+this.positionY;//+" ,ctr.: "+this.counter;
-		else return "-------";
+		//if(this.type==true)return "x:"+this.positionX+",y:"+this.positionY;//+" ,ctr.: "+this.counter;
+		//else return "-------";
+		if(this.type==1)return "X";
+		if(this.type==0)return ".";
+		if(this.type==-1)return "*";
+		else return "?";
 	}
 }
