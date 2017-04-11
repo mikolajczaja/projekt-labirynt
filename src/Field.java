@@ -5,7 +5,7 @@ public class Field {
 	private int positionY;
 	
 	private int counter=0;
-	private int type=0;  //:INFO 1-sciana, 0- puste, -1-koniec
+	private int type=0;  //:INFO 1-sciana, 0- puste, -1-poczatek, -2-koniec
 	
 	Field(int positionX, int positionY,int counter,int type){
 		this.positionX=positionX;
@@ -41,7 +41,7 @@ public class Field {
 		this.type=type;
 	}
 	
-	void iterateCounter(){
+	void incrementCounter(){
 		this.counter++;
 	}
 	
@@ -51,7 +51,8 @@ public class Field {
 		//else return "-------";
 		if(this.type==1)return "X";
 		if(this.type==0)return ".";
-		if(this.type==-1)return "*";
+		if(this.type==-1)return "p";
+		if(this.type==-2)return "k";
 		else return "?";
 	}
 }
