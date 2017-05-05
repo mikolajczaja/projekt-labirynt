@@ -6,6 +6,7 @@ public class Field {
 	
 	private int counter=0;
 	private int type=0;  //:INFO 1-sciana, 0- puste, -1-poczatek, -2-koniec
+	private boolean junction=false;
 	
 	Field(int positionX, int positionY,int counter,int type){
 		this.positionX=positionX;
@@ -27,6 +28,9 @@ public class Field {
 	int getType(){
 		return this.type;
 	}
+	boolean getJunction(){
+		return this.junction;
+	}
 	
 	void setPositionX(int positionX){
 		this.positionX=positionX;
@@ -40,6 +44,10 @@ public class Field {
 	void setType(int type){
 		this.type=type;
 	}
+	void setJunction(boolean junction){
+		this.junction=junction;
+	}
+	
 	
 	void incrementCounter(){
 		this.counter++;

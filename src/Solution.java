@@ -4,13 +4,19 @@ import java.util.Random;
 
 public class Solution {
 
-	public static int SIZE=5;
+	public static int SIZE=10;
 	List<Field> stepList= new LinkedList<Field>();
 	Field[][] maze= new Field[SIZE+1][SIZE+1];
 
+	
+	Field getLastJunction(){
+		for(int i=getListSize()-1;i>=0;i--){
+			if(getList(i).getJunction()==true)return getList(i);
+		}
+		return getEntrance();
+	}
 
 	void addList(Field field){
-
 		this.stepList.add(field);
 	}
 
@@ -46,12 +52,6 @@ public class Solution {
 		}
 	}
 
-	boolean alreadyVisited(Field field){
-		if(field.getCounter()>=countNearbyFields(field))return true;
-		else return false;
-	}
-
-
 
 	Field[][] fillMaze(){
 
@@ -62,6 +62,17 @@ public class Solution {
 		}
 		return maze;
 	}
+	
+	Field[][] copyMaze(Field[][] readyMaze){
+
+		for(int j=1;j<=SIZE;j++){
+			for(int i=1;i<=SIZE;i++){
+				maze[i][j]=new Field(i,j,readyMaze[i][j].getCounter(),readyMaze[i][j].getType());
+			}
+		}
+		return maze;
+	}
+	
 
 	void setEntrance(int positionX,int positionY){
 		getField(positionX,positionY).setType(-1);
@@ -106,15 +117,35 @@ public class Solution {
 		}
 	}
 
+	
 	void printMazeCounters(){
 		for(int j=1;j<=SIZE;j++){
 			for(int i=1;i<=SIZE;i++){
-				System.out.print(getField(i,j).getCounter()+"|");
+				System.out.print(getField(i,j).getCounter());
+			}
+			System.out.print("\n");
+		}
+	}
+	void printMazeJunctions(){
+		for(int j=1;j<=SIZE;j++){
+			for(int i=1;i<=SIZE;i++){
+				if(getField(i,j).getJunction()==true)
+					System.out.print('x');
+				else System.out.print('.');
 			}
 			System.out.print("\n");
 		}
 	}
 
+	void setJunctions(){
+		for(int j=1;j<=SIZE;j++){
+			for(int i=1;i<=SIZE;i++){
+				if(countNearbyFields(getField(i,j))>2)getField(i,j).setJunction(true);
+			}
+		}
+	}
+	
+	
 	void setRandomWalls(int number){
 
 		Random random=new Random();
@@ -169,7 +200,17 @@ public class Solution {
 
 	}
 
-
+	boolean alreadyVisited(Field field){
+		//if(field.getCounter()>=countNearbyFields(field))return true;
+		if(field.getCounter()>0)return true;
+		else return false;
+	}
+	
+	boolean counterFull(Field field){
+		if(field.getCounter()==countNearbyFields(field))return true;
+		else return false;
+	}
+	
 	boolean canMove(Field field){
 		if((field!=null)&&(alreadyVisited(field)==false)&&(field.getType()!=1))
 		{
@@ -201,9 +242,23 @@ public class Solution {
 
 	Field moveBack(Field field){
 		Field nextField;
-		if((field.getCounter()>=countNearbyFields(field))&&(field.getType()!=-1))
+		
+		//if((field.getType()==-1)&&(counterFull(field)))return null;
+		if(getListSize()>1)removeList(field);
+			//nextField=getLastJunction();
+			nextField=getListTail();
+			return nextField;
+		//}
+		//else return getEntrance();
+	}
+	
+	Field moveBack2(Field field){
+		Field nextField;
+		//if((field.getJunction()!=true)&&(field.getType()!=-1))
+		if((counterFull(field))&&(getListSize()>1))
 		{
 			removeList(field);
+			//nextField=getLastJunction();
 			nextField=getListTail();
 			moveBack(nextField);
 		}
@@ -213,25 +268,23 @@ public class Solution {
 
 	void move(Field field){
 
-		//System.out.println(getListTail());
-		if((field.getType()!=-2)){
+		//System.out.println(field);
+		if((field.getType()!=-2)&&(counterFull(field)==false)){
 			field.incrementCounter();
 			Field nextField;
-			int nearbyCount=countNearbyFields(field);
-			//System.err.println(nearbyCount+","+field.getCounter());
-			if((nearbyCount>=field.getCounter())&&(field.getCounter()<=4)){
+
 				nextField=changeField(field);
 				//System.out.println(nextField.getPositionX()+","+nextField.getPositionY());
 				if(nextField!=field){
 					addList(nextField);//:TODO check if it even works
 					move(nextField);
 				}
-				//else nextField=moveBack(field);
-			}
-			else nextField=moveBack(field);
-
-			//if(nextField!=null)
-			//else System.out.print("\n\n"+"aaaaaaaaaa"+"\n");
+				else {
+					
+					nextField=moveBack(field);
+					move(nextField);
+				}
+			//move(nextField);
 		} 
 		//return nextField;
 
@@ -260,10 +313,11 @@ public class Solution {
 
 	public static void main(String[] args){
 		Solution s1= new Solution();
-
-		s1.fillMaze();
-		s1.setRandomWalls(10);
-
+		Solution s2= new Solution();
+		
+		Field[][] maze=s1.fillMaze();
+		s1.setRandomWalls(30);
+		s1.setJunctions();
 		/*		Field f1=new Field(2,2,0,0);
 		Field f2=new Field(3,3,0,0);
 		s1.addList(f1);
@@ -301,10 +355,19 @@ public class Solution {
 		s1.setExit(SIZE,SIZE);
 
 		//s1.printMaze();
+		/*
+		s2.copyMaze(maze);
+		s2.addList(s2.getEntrance());
+		s2.move(s2.getEntrance());
+		s2.printMaze();
+		*/
+		System.out.print("\n");
 		s1.addList(s1.getEntrance());
 		s1.move(s1.getEntrance());
 		s1.printList();
 		s1.printMaze();
+		//System.out.print("\n");
+		//s1.printMazeJunctions();
 		//System.out.println(s1.getList(s1.getListSize()-1).getPositionX()+","+s1.getList(s1.getListSize()-1).getPositionY());
 
 		//s1.printAllXY();
