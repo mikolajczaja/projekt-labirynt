@@ -8,7 +8,7 @@ public class Solution {
 	List<Field> stepList= new LinkedList<Field>();
 	Field[][] maze= new Field[SIZE+1][SIZE+1];
 
-	
+
 	Field getLastJunction(){
 		for(int i=getListSize()-1;i>=0;i--){
 			if(getList(i).getJunction()==true)return getList(i);
@@ -62,7 +62,7 @@ public class Solution {
 		}
 		return maze;
 	}
-	
+
 	Field[][] copyMaze(Field[][] readyMaze){
 
 		for(int j=1;j<=SIZE;j++){
@@ -72,7 +72,7 @@ public class Solution {
 		}
 		return maze;
 	}
-	
+
 
 	void setEntrance(int positionX,int positionY){
 		getField(positionX,positionY).setType(-1);
@@ -117,7 +117,7 @@ public class Solution {
 		}
 	}
 
-	
+
 	void printMazeCounters(){
 		for(int j=1;j<=SIZE;j++){
 			for(int i=1;i<=SIZE;i++){
@@ -144,8 +144,8 @@ public class Solution {
 			}
 		}
 	}
-	
-	
+
+
 	void setRandomWalls(int number){
 
 		Random random=new Random();
@@ -171,7 +171,7 @@ public class Solution {
 		Field tmpField;
 
 		if(field.getType()!=1){
-			if(positionX<SIZE){     //:INFO SIZE=max X+1 bo zakres X:0-4, a size jest 5
+			if(positionX<SIZE){
 				tmpField=getField(positionX+1,positionY);
 				if(tmpField.getType()!=1)fieldCounter++;
 			}
@@ -201,27 +201,23 @@ public class Solution {
 	}
 
 	boolean alreadyVisited(Field field){
-		//if(field.getCounter()>=countNearbyFields(field))return true;
 		if(field.getCounter()>0)return true;
 		else return false;
 	}
-	
+
 	boolean counterFull(Field field){
 		if(field.getCounter()==countNearbyFields(field))return true;
 		else return false;
 	}
-	
+
 	boolean canMove(Field field){
 		if((field!=null)&&(alreadyVisited(field)==false)&&(field.getType()!=1))
-		{
-			//System.out.println(field.getPositionX()+","+field.getPositionY());
 			return true;
-		}
 		else return false;
 	}
 
 	Field changeField(Field field){
-		//System.out.println(field);
+
 		Field nextField=getField(field.getPositionX()+1,field.getPositionY());
 		if(canMove(nextField))return nextField;
 		else {
@@ -242,23 +238,19 @@ public class Solution {
 
 	Field moveBack(Field field){
 		Field nextField;
-		
-		//if((field.getType()==-1)&&(counterFull(field)))return null;
+
 		if(getListSize()>1)removeList(field);
-			//nextField=getLastJunction();
-			nextField=getListTail();
-			return nextField;
-		//}
-		//else return getEntrance();
+		
+		nextField=getListTail();
+		return nextField;
+
 	}
-	
+
 	Field moveBack2(Field field){
 		Field nextField;
-		//if((field.getJunction()!=true)&&(field.getType()!=-1))
-		if((counterFull(field))&&(getListSize()>1))
-		{
+		
+		if((counterFull(field))&&(getListSize()>1)){
 			removeList(field);
-			//nextField=getLastJunction();
 			nextField=getListTail();
 			moveBack(nextField);
 		}
@@ -268,36 +260,22 @@ public class Solution {
 
 	void move(Field field){
 
-		//System.out.println(field);
 		if((field.getType()!=-2)&&(counterFull(field)==false)){
 			field.incrementCounter();
 			Field nextField;
 
-				nextField=changeField(field);
-				//System.out.println(nextField.getPositionX()+","+nextField.getPositionY());
-				if(nextField!=field){
-					addList(nextField);//:TODO check if it even works
-					move(nextField);
-				}
-				else {
-					
-					nextField=moveBack(field);
-					move(nextField);
-				}
-			//move(nextField);
-		} 
-		//return nextField;
+			nextField=changeField(field);
+			if(nextField!=field){
+				addList(nextField);
+				move(nextField);
+			}
+			else {
+				nextField=moveBack(field);
+				move(nextField);
+			}
+		}
 
 	}
-
-	//:TODO move:-sprawdzenie alreadyVisited
-	//			 -zliczenie countNearbyFields
-	//			 -sprawdzenie czy powyzsze==field.counter 
-	//							(jesli nie to idz w pole nr counter od prawej)
-	//							(jesli tak, to idz do tylu)
-	//			 -incrementFieldCounter
-	// to wszystko dla nastepnego pola (Field)
-
 
 
 	void printAllXY(){  //:INFO ta metoda do testow jest tylko
@@ -313,66 +291,23 @@ public class Solution {
 
 	public static void main(String[] args){
 		Solution s1= new Solution();
-		Solution s2= new Solution();
-		
+		//Solution s2= new Solution();
+
 		Field[][] maze=s1.fillMaze();
+
 		s1.setRandomWalls(30);
-		s1.setJunctions();
-		/*		Field f1=new Field(2,2,0,0);
-		Field f2=new Field(3,3,0,0);
-		s1.addList(f1);
-		s1.addList(f1);
-		s1.addList(f1);
-		s1.addList(f2);
 
-		s1.printList();
-		System.out.print("\n");
-		s1.removeList(f1);
-		s1.printList();
-		System.out.print("\n");
-		s1.removeList(f1);
-		s1.printList();
-		System.out.print("\n");
-		 */	
-
-
-
-		/*
-		s1.addList(s1.getField(1,1));
-		s1.addList(s1.getField(1,2));
-		s1.addList(s1.getField(1,3));
-		System.err.println(s1.alreadyVisited(s1.getField(2,3)));
-		s1.addList(s1.getField(2,3));		
-		System.err.println(s1.alreadyVisited(s1.getField(1,3)));
-		System.err.println(s1.alreadyVisited(s1.getField(2,3)));
-		System.err.println(s1.alreadyVisited(s1.getField(3,3)));
-		 */
-
-		//s1.printNearbyFields(s1.getField(3,3));
-		//s1.setWall(4,3);
+		//s1.setJunctions();
 
 		s1.setEntrance(1,1);
 		s1.setExit(SIZE,SIZE);
 
-		//s1.printMaze();
-		/*
-		s2.copyMaze(maze);
-		s2.addList(s2.getEntrance());
-		s2.move(s2.getEntrance());
-		s2.printMaze();
-		*/
 		System.out.print("\n");
 		s1.addList(s1.getEntrance());
 		s1.move(s1.getEntrance());
 		s1.printList();
 		s1.printMaze();
-		//System.out.print("\n");
-		//s1.printMazeJunctions();
-		//System.out.println(s1.getList(s1.getListSize()-1).getPositionX()+","+s1.getList(s1.getListSize()-1).getPositionY());
 
-		//s1.printAllXY();
-
-		//s1.printMazeCounters();
 	}
 
 }
