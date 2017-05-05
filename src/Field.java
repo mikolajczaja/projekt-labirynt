@@ -47,12 +47,6 @@ public class Field {
 	
 	@Override
 	public String toString(){
-		//if(this.type==true)return "x:"+this.positionX+",y:"+this.positionY;//+" ,ctr.: "+this.counter;
-		//else return "-------";
-		if(this.type==1)return "X";
-		if(this.type==0)return ".";
-		if(this.type==-1)return "p";
-		if(this.type==-2)return "k";
-		else return "?";
+		return this.positionX+","+this.positionY;
 	}
 }
