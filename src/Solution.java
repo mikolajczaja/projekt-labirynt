@@ -1,5 +1,3 @@
-import java.awt.BasicStroke;
-import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -7,28 +5,29 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.geom.Line2D;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import javax.swing.*;
 
-//:TODO poprawka skracania drogi
 //:TODO oczyszczenie kodu
-//:TODO okienka do "no solution found" i polonizacja
+//:TODO okienko do file not found
 public class Solution {
 
 	public static int SIZE_X = 20;
 	public static int SIZE_Y = 20;
 
 	List<List<Field>> solutionList = new LinkedList<List<Field>>();
+	List<List<Field>> solutionList2 = new LinkedList<List<Field>>();
 	List<Field> stepList = new LinkedList<Field>();
 	Field[][] maze = new Field[SIZE_X + 1][SIZE_Y + 1];
-
+	List<Integer> order=new ArrayList<Integer>();
+	
 	void setSizeX(int sizeX) {
 		SIZE_X = sizeX;
 	}
@@ -41,6 +40,10 @@ public class Solution {
 		this.maze=new Field[SIZE_X + 1][SIZE_Y + 1];
 	}
 	
+	List<Integer> getOrder(){
+		return this.order;
+	}
+	
 	Field getLastJunction() {
 		for (int i = getListSize() - 1; i >= 0; i--) {
 			if (getList(i).getJunction() == true)
@@ -51,7 +54,6 @@ public class Solution {
 
 	void addList(Field field) {
 		this.stepList.add(field);
-		// System.out.println(field);
 	}
 
 	void removeList(int index) {
@@ -59,7 +61,6 @@ public class Solution {
 	}
 
 	void removeList(Field field) {
-		// System.err.println(field);
 		this.stepList.remove(field);
 	}
 
@@ -99,6 +100,20 @@ public class Solution {
 		return false;
 	}
 
+	Field getNextField(Field field,int valueX, int valueY){
+		return getField(field.getPositionX()+valueX,field.getPositionY()+valueY);
+	}
+	
+	boolean isOnList(Field field,int valueX,int valueY,List<Field> stepList){
+		Field nextField=getNextField(field,valueX,valueY);
+		for (int i = 0; i < getListSize(stepList); i++) {
+			if (getList(i, stepList) == nextField)
+				return true;
+		}
+		return false;
+	}
+	
+	
 	void printList() {
 		for (int i = 0; i < this.stepList.size(); i++) {
 			System.out.println("x:" + getList(i).getPositionX() + "y:"
@@ -119,17 +134,15 @@ public class Solution {
 		for (int i = 0; i < this.stepList.size(); i++) {
 			Field tmpField = getList(i);
 			tmp.add(tmpField);
-			/// System.out.println(getList(i));
 		}
-		// System.out.print("\n");
-		// System.out.println(this.stepList.size()+" , "+tmp.size());
 		return tmp;
 	}
 
-	void saveList() {
+	List<Field> saveList() {
 		List<Field> tmp = new LinkedList<Field>();
 		tmp = copySteps();
 		this.solutionList.add(tmp);
+		return tmp;
 	}
 
 	void printSolutionList() {
@@ -141,65 +154,30 @@ public class Solution {
 		}
 	}
 
-	void drawSolution(int index) {
-
-		List<Field> stepList = this.solutionList.get(index);
-		//shortenList(stepList);
-		//shortenList(stepList);
-		 //shortenList(stepList);
-		//shortenUp(stepList);
-		shortenLeft(stepList);
-		shortenLeft(stepList);
-		shortenLeft(stepList);
-		shortenLeft(stepList);
-		 //shortenUp(stepList);
-		 //shortenUp(stepList);
-		 shortenDown(stepList);
-		 shortenDown(stepList);
-		 shortenDown(stepList);
-		 shortenDown(stepList);
-		 //shortenRight(stepList);
-		 //:TODO te dwa psuja rozwiazanie tylko przy poczatku, ale zazwyczaj w ogole nie psuja
-		 //natomiast reszta psuje bardzo czesto
-		 
-		/*
-		 * for(int j=1;j<=SIZE_Y;j++){ for(int i=1;i<=SIZE_X;i++){
-		 * if(isOnList(getField(i,j),stepList)) System.out.print('+'); else
-		 * System.out.print(mazeRepresentation(getField(i,j))); }
-		 * System.out.print("\n"); }
-		 */
-	}
-
+	
+	
+	
 	void shortenList(List<Field> stepList) {
-		// List<Field> stepList=this.solutionList.get(index);
 
-		for (int i = 0; i < stepList.size(); i++) {
-			Field tmpField = stepList.get(i);
-			Field tmpField2 = getField(tmpField.getPositionX(),
-					tmpField.getPositionY() - 1);
+			Field tmpField;
+			Field tmpField2;
 
-			if (isOnList(tmpField2, stepList)) {
-				shortcut(tmpField, tmpField2, stepList);
-				tmpField2 = getField(tmpField.getPositionX() - 1,
-						tmpField.getPositionY());
-			} else if (isOnList(tmpField2, stepList)) {
-				shortcut(tmpField, tmpField2, stepList);
-				tmpField2 = getField(tmpField.getPositionX(),
-						tmpField.getPositionY() + 1);
-			} else if (isOnList(tmpField2, stepList)) {
-				shortcut(tmpField, tmpField2, stepList);
-				tmpField2 = getField(tmpField.getPositionX() + 1,
-						tmpField.getPositionY());
-			} else if (isOnList(tmpField2, stepList)) {
-				shortcut(tmpField, tmpField2, stepList);
-			}
-
-		}
+			for (int i = 1; i < stepList.size(); i++)
+				for(int j=1;j<stepList.size();j++){
+				tmpField=stepList.get(i);
+				tmpField2=stepList.get(j);
+				if((canShortcut(tmpField,tmpField2,stepList))&&(tmpField.getType()==0)&&(tmpField2.getType()==0)){
+					
+					System.out.println(tmpField+" , "+tmpField2);
+					shortcut(tmpField,tmpField2,stepList);
+				}
+				}
+		
 	}
 
 	void shortenRight(List<Field> stepList) {
 
-		for (int i = 0; i < stepList.size(); i++) {
+		for (int i = 1; i < stepList.size(); i++) {
 			Field tmpField = stepList.get(i);
 			Field tmpField2 = getField(tmpField.getPositionX() + 1,
 					tmpField.getPositionY());
@@ -211,6 +189,7 @@ public class Solution {
 		}
 	}
 
+	
 	void shortenLeft(List<Field> stepList) {
 
 		for (int i = 1; i < stepList.size(); i++) {
@@ -225,6 +204,58 @@ public class Solution {
 		}
 	}
 
+	boolean canShortcut(Field field, Field field2, List<Field> stepList){
+		int ctr=0;
+		int diffX=field.getPositionX()-field2.getPositionX();
+		int diffY=field.getPositionY()-field2.getPositionY();
+		
+		if (diffX > 0) {
+			ctr=0;
+			for (int i = 1; i < SIZE_X - field.getPositionX(); i++) {
+				if (((isOnList(field, i - 1, 0, stepList)))
+						&& (getNextField(field, i, 0).getType() != 1)
+						&& (isOnList(getNextField(field, i, 0)) == false))
+					ctr++;
+			}
+			if (ctr == SIZE_X - field.getPositionX() - 1)
+				return true;
+		}
+		else if(diffX<0){
+			ctr=0;
+			for (int i = -1; i > SIZE_X - field.getPositionX(); i--) {
+				if (((isOnList(field, i+1, 0, stepList)))
+						&& (getNextField(field, i, 0).getType() != 1)
+						&& (isOnList(getNextField(field, i, 0)) == false))
+					ctr++;
+			}
+			if (ctr == SIZE_X - field.getPositionX() - 1)
+				return true;
+		}
+		else if(diffY>0){
+			ctr=0;
+			for (int i = 1; i < SIZE_Y - field.getPositionY(); i++) {
+				if (((isOnList(field, 0, i-1, stepList)))
+						&& (getNextField(field, 0, i).getType() != 1)
+						&& (isOnList(getNextField(field, 0, i)) == false))
+					ctr++;
+			}
+			if (ctr == SIZE_Y - field.getPositionY() - 1)
+				return true;
+		}
+		else if(diffY<0){
+			ctr=0;
+			for (int i = -1; i > SIZE_Y - field.getPositionY(); i++) {
+				if (((isOnList(field, 0, i+1, stepList)))
+						&& (getNextField(field, 0, i).getType() != 1)
+						&& (isOnList(getNextField(field, 0, i)) == false))
+					ctr++;
+			}
+			if (ctr == SIZE_Y - field.getPositionY() - 1)
+				return true;
+		}
+	return false;
+	}
+	
 	void shortenDown(List<Field> stepList) {
 
 		for (int i = 1; i < stepList.size(); i++) {
@@ -241,7 +272,7 @@ public class Solution {
 
 	void shortenUp(List<Field> stepList) {
 
-		for (int i = 0; i < stepList.size(); i++) {
+		for (int i = 1; i < stepList.size(); i++) {
 			Field tmpField = stepList.get(i);
 			Field tmpField2 = getField(tmpField.getPositionX() + 1,
 					tmpField.getPositionY() - 1);
@@ -268,31 +299,36 @@ public class Solution {
 		int shortcutDifference = shortcutFinish - shortcutStart;
 
 		if (shortcutDifference > 1)
-			for (int i = shortcutFinish - 1; i >= shortcutStart + 1; i--) {
+			for (int i = shortcutFinish-1; i >=shortcutStart+1 ; i--) {
+				//System.out.println("1");
 				stepList.remove(i);
 			}
 		else if (shortcutDifference < -1)
-			for (int i = shortcutStart; i >= shortcutFinish; i--) {
+			for (int i = shortcutStart; i > shortcutFinish; i--) {
+				//System.out.println("2");
 				stepList.remove(i);
 			}
 	}
 
-	void drawSolution(List<Field> stepList) {
-		for (int k = 0; k < this.solutionList.size(); k++)
-			if (this.solutionList.get(k) == stepList) {
-				drawSolution(k);
+	
+	List<Field> pickBestSolution() {
+
+		List<Field> bestSolution;
+		
+		if (this.solutionList.isEmpty() == false) {
+			bestSolution = this.solutionList.get(0);
+		
+			for (int i = 0; i < this.solutionList.size(); i++) {
+				if (this.solutionList.get(i).size() < bestSolution.size()){
+					bestSolution = this.solutionList.get(i);
+				}
 			}
-	}
+			
+		}else bestSolution=null;
 
-	boolean drawAllSolutions() {
-
-		boolean status = false;
-		for (int i = 0; i < this.solutionList.size(); i++) {
-			drawSolution(i);
-			status = true;
-		}
-		return status;
+		return bestSolution;
 	}
+	
 
 	void drawBestSolution() {
 		if (this.solutionList.isEmpty() == false) {
@@ -301,7 +337,7 @@ public class Solution {
 				if (this.solutionList.get(i).size() < bestSolution.size())
 					bestSolution = this.solutionList.get(i);
 			}
-			makeGraphicRepresentation(getSolutionIndex(bestSolution));
+			//makeGraphicRepresentation(getSolutionIndex(bestSolution));
 		}
 	}
 
@@ -393,8 +429,7 @@ public class Solution {
 		while (nextInt != -1) {
 			nextChar = (char) nextInt;
 			nextInt = bufferedReader.read();
-			// System.out.println(i + "," + j);
-			// System.out.print(nextChar);
+
 
 			if (nextChar == 13) {
 				for (int counter = i; counter <= SIZE_X; counter++)
@@ -489,10 +524,10 @@ public class Solution {
 
 	}
 
-	void makeGraphicRepresentation(int index) {
+	void makeGraphicRepresentation(List<Field> stepList) {
 
-		List<Field> stepList = this.solutionList.get(index);
-
+		//List<Field> stepList = this.solutionList.get(index);
+		if(stepList!=null){
 		JFrame frame = new JFrame("solution");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(100 + 30 * SIZE_X, 100 + 30 * SIZE_Y);
@@ -552,12 +587,27 @@ public class Solution {
 				desc.dispose();
 			}
 		});
-
+	}
 	}
 
 	class SolverButtonMouseAdapter extends MouseAdapter {
 	}
 
+	void drawError(){
+	JFrame errorFrame=new JFrame("error");
+	errorFrame.setSize(200, 100);
+	errorFrame.setLocation(100,100);
+
+	
+	JTextField error = new JTextField();
+	error.setBounds(110, 110, 75, 20);
+	error.setEditable(false);
+	errorFrame.getContentPane().add(error);
+	error.setText("nie znaleziono rozwiazania");
+	
+	errorFrame.setVisible(true);
+	}
+	
 	JFrame drawDescription() {
 
 		JFrame descFrame = new JFrame("description");
@@ -656,14 +706,6 @@ public class Solution {
 		}
 	}
 
-	void setJunctions() {
-		for (int j = 1; j <= SIZE_Y; j++) {
-			for (int i = 1; i <= SIZE_X; i++) {
-				if (countNearbyFields(getField(i, j)) > 2)
-					getField(i, j).setJunction(true);
-			}
-		}
-	}
 
 	void setRandomWalls(int number) {
 
@@ -733,8 +775,12 @@ public class Solution {
 	}
 
 	boolean counterFull(Field field) {
-		if (field.getCounter() == countNearbyFields(field))
-			return true; // >=20)return true;//
+		
+		if (field.getCounter() == countNearbyFields(field)){
+
+			return true;
+		}
+		
 		else
 			return false;
 	}
@@ -747,7 +793,43 @@ public class Solution {
 			return false;
 	}
 
-	Field changeField(Field field) {
+	Field getFieldNo(Field field,int number){
+		Field tmpField;
+
+		
+		if(number==1)tmpField=getField(field.getPositionX()+1, field.getPositionY());
+		else if(number==2)tmpField=getField(field.getPositionX()-1, field.getPositionY());
+		else if(number==3)tmpField=getField(field.getPositionX(), field.getPositionY()+1);
+		else if(number==4)tmpField=getField(field.getPositionX(), field.getPositionY()-1);
+		else tmpField=field;
+		return tmpField;
+	}
+	
+	List<Integer> setOrder(){
+		
+		for (int i =1; i<=4; i++) {
+		    order.add(i);
+		}
+		Collections.shuffle(order);
+		
+		return order;
+	}
+	
+
+	
+	Field changeField(Field field,List<Integer> order){
+		
+		Field nextField;
+		
+		for(int i=0;i<4;i++){
+		nextField=getFieldNo(field,order.get(i));
+		if (canMove(nextField))return nextField;
+		}
+		
+	return field;
+	}
+	
+	Field changeField2(Field field) {
 
 		Field nextField = getField(field.getPositionX() + 1, field.getPositionY());
 		if (canMove(nextField))
@@ -776,14 +858,11 @@ public class Solution {
 	Field moveBack(Field field) {
 		Field nextField = field;
 
-		// if(counterFull(field)==true){
-		// System.err.println("222222222");
 		if (getListSize() > 1)
 			removeList(field);
 
 		nextField = getListTail();
-		// moveBack(nextField);
-		// }
+
 		return nextField;
 
 	}
@@ -803,19 +882,21 @@ public class Solution {
 
 		if ((field.getType() != -2) && (counterFull(field) == false)) {
 
+			
 			field.incrementCounter();
 			Field nextField;
 
-			nextField = changeField(field);
+			nextField = changeField(field,getOrder());
 			if (nextField != field) {
 				addList(nextField);
 				move(nextField);
 			} else {
 				nextField = moveBack(field);
-				// for(int i=0;i<getListSize();i++){
-				/// nextField=moveBack(nextField);
-				// }
-				// :TODO
+				
+				//for(int i=0;i<getListSize();i++){
+				 //nextField=moveBack(nextField);
+				 //}
+				// :TODO tu zmiana powyzej
 				if (nextField != field)
 					move(nextField);
 			}
@@ -843,6 +924,14 @@ public class Solution {
 		}
 	}
 
+	void clearMaze() {
+		for (int j = 1; j <= SIZE_Y; j++) {
+			for (int i = 1; i <= SIZE_X; i++) {
+				getField(i,j).setCounter(0);
+			}
+		}
+	}
+	//:INFO mazeSolver
 	void solveMaze(int sizeX, int sizeY, int wallCount) {
 		setSizeX(sizeX);
 		setSizeY(sizeY);
@@ -851,14 +940,26 @@ public class Solution {
 		setRandomWalls(wallCount);
 		setEntrance(1, 1);
 		setExit(SIZE_X, SIZE_Y);
+
+		setOrder();
+		for(int i=0;i<100;i++){
+		setOrder();
 		addList(getEntrance());
 		move(getEntrance());
 
-		if (drawAllSolutions() == false) {
-			System.err.println("no solution found");
-			mazeSolver();
+		clearMaze();
+		}
+		
+		if (pickBestSolution() == null) {
+
+			List<Field> newList=new LinkedList<Field>();
+			newList.add(getEntrance());
+			makeGraphicRepresentation(newList);
+			drawError();
+			//solveMaze(sizeX,sizeY,wallCount);
+			//mazeSolver();
 		} else
-			drawBestSolution();
+			makeGraphicRepresentation(pickBestSolution());
 
 	}
 
@@ -867,13 +968,24 @@ public class Solution {
 			setMazeSize();
 			fillMaze();
 			readMazeFromFile(fileName);
-			addList(getEntrance());
-			move(getEntrance());
-			if (drawAllSolutions() == false) {
-				System.err.println("no solution found");
-				mazeSolver();
+			
+			for(int i=0;i<100;i++){
+				setOrder();
+				addList(getEntrance());
+				move(getEntrance());
+				
+				clearMaze();
+				}
+			
+			if (pickBestSolution() == null) {
+
+				List<Field> newList=new LinkedList<Field>();
+				newList.add(getEntrance());
+				makeGraphicRepresentation(newList);
+				drawError();
+				//mazeSolver();
 			} else
-				drawBestSolution();
+				makeGraphicRepresentation(pickBestSolution());
 
 		} catch (IOException e) {
 			System.err.println("file not found");
