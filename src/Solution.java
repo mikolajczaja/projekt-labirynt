@@ -658,7 +658,7 @@ public class Solution {
 		}
 	}
 	
-	//:INFO mazeSolver
+	//:INFO rozwiazywanie wygenerowanego losowo labiryntu
 	void solveMaze(int sizeX, int sizeY, int wallCount,int entranceX,int entranceY,int exitX,int exitY) {
 		
 		if((sizeX>30)||(sizeY>30)||(wallCount>sizeX*sizeY)){
@@ -696,7 +696,8 @@ public class Solution {
 			makeGraphicRepresentation(pickBestSolution());
 
 	}
-
+	
+//:INFO rozwiazywanie wczytanego labiryntu	
 	void solveMaze(String fileName) {
 		try {
 			
@@ -726,6 +727,7 @@ public class Solution {
 		}
 	}
 
+//:INFO glowna metoda GUI
 	void mazeSolver() {
 		
 		solutionList.clear();
