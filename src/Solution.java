@@ -15,27 +15,24 @@ import java.util.List;
 import java.util.Random;
 import javax.swing.*;
 
-//:TODO oczyszczenie kodu
-//:TODO okienko do file not found
 public class Solution {
-
-	public static int SIZE_X = 20;
-	public static int SIZE_Y = 20;
+	
+	public int rectSize=30;
+	public static int SIZE_X = 10;
+	public static int SIZE_Y = 10;
 
 	List<List<Field>> solutionList = new LinkedList<List<Field>>();
-	List<List<Field>> solutionList2 = new LinkedList<List<Field>>();
 	List<Field> stepList = new LinkedList<Field>();
 	Field[][] maze = new Field[SIZE_X + 1][SIZE_Y + 1];
 	List<Integer> order=new ArrayList<Integer>();
 	
+//:INFO gettery, settery i obsluga list
 	void setSizeX(int sizeX) {
 		SIZE_X = sizeX;
 	}
-
 	void setSizeY(int sizeY) {
 		SIZE_Y = sizeY;
 	}
-
 	void setMazeSize(){
 		this.maze=new Field[SIZE_X + 1][SIZE_Y + 1];
 	}
@@ -43,55 +40,71 @@ public class Solution {
 	List<Integer> getOrder(){
 		return this.order;
 	}
-	
-	Field getLastJunction() {
-		for (int i = getListSize() - 1; i >= 0; i--) {
-			if (getList(i).getJunction() == true)
-				return getList(i);
+//:INFO mieszanie kolejnosci sprawdzania sasiednich pol
+	List<Integer> setOrder(){
+		
+		for (int i =1; i<=4; i++) {
+		    order.add(i);
 		}
-		return getEntrance();
+		Collections.shuffle(order);
+		
+		return order;
+	}
+
+	void setEntrance(int positionX, int positionY) {
+		getField(positionX, positionY).setType(-1);
+	}
+	void setExit(int positionX, int positionY) {
+		getField(positionX, positionY).setType(-2);
+	}
+	
+	Field getEntrance() {
+		for (int j = 1; j <= SIZE_Y; j++) {
+			for (int i = 1; i <= SIZE_X; i++) {
+				if (getField(i, j).getType() == -1)
+					return getField(i, j);
+			}
+		}
+		return null;
+	}
+
+	Field getExit() {
+		for (int j = 1; j <= SIZE_Y; j++) {
+			for (int i = 1; i <= SIZE_X; i++) {
+				if (getField(i, j).getType() == -2)
+					return getField(i, j);
+			}
+		}
+		return null;
 	}
 
 	void addList(Field field) {
 		this.stepList.add(field);
 	}
-
 	void removeList(int index) {
 		this.stepList.remove(index);
 	}
-
 	void removeList(Field field) {
 		this.stepList.remove(field);
 	}
-
 	Field getList(int index) {
 		return this.stepList.get(index);
 	}
-
 	Field getList(int index, List<Field> stepList) {
 		return stepList.get(index);
 	}
-
 	Field getListTail() {
 		return this.stepList.get(this.stepList.size() - 1);
 	}
-
 	int getListSize() {
 		return this.stepList.size();
 	}
-
 	int getListSize(List<Field> stepList) {
 		return stepList.size();
 	}
+	
 
-	boolean isOnList(Field field) {
-		for (int i = 0; i < getListSize(); i++) {
-			if (getList(i) == field)
-				return true;
-		}
-		return false;
-	}
-
+//:INFO sprawdzanie czy pole jest na liscie
 	boolean isOnList(Field field, List<Field> stepList) {
 		for (int i = 0; i < getListSize(stepList); i++) {
 			if (getList(i, stepList) == field)
@@ -100,34 +113,7 @@ public class Solution {
 		return false;
 	}
 
-	Field getNextField(Field field,int valueX, int valueY){
-		return getField(field.getPositionX()+valueX,field.getPositionY()+valueY);
-	}
-	
-	boolean isOnList(Field field,int valueX,int valueY,List<Field> stepList){
-		Field nextField=getNextField(field,valueX,valueY);
-		for (int i = 0; i < getListSize(stepList); i++) {
-			if (getList(i, stepList) == nextField)
-				return true;
-		}
-		return false;
-	}
-	
-	
-	void printList() {
-		for (int i = 0; i < this.stepList.size(); i++) {
-			System.out.println("x:" + getList(i).getPositionX() + "y:"
-					+ getList(i).getPositionY());
-		}
-	}
-
-	void printList(List<Field> stepList) {
-		for (int i = 0; i < stepList.size(); i++) {
-			System.out.println("x:" + getList(i, stepList).getPositionX() + "y:"
-					+ getList(i, stepList).getPositionY());
-		}
-	}
-
+		
 	List<Field> copySteps() {
 		List<Field> tmp = new LinkedList<Field>();
 
@@ -138,6 +124,7 @@ public class Solution {
 		return tmp;
 	}
 
+//:INFO zapisywanie rozwiazania na liste	
 	List<Field> saveList() {
 		List<Field> tmp = new LinkedList<Field>();
 		tmp = copySteps();
@@ -145,172 +132,7 @@ public class Solution {
 		return tmp;
 	}
 
-	void printSolutionList() {
-		for (int i = 0; i < this.solutionList.size(); i++) {
-
-			List<Field> stepList = this.solutionList.get(i);
-			System.out.println("Solution no.:" + i);
-			printList(stepList);
-		}
-	}
-
-	
-	
-	
-	void shortenList(List<Field> stepList) {
-
-			Field tmpField;
-			Field tmpField2;
-
-			for (int i = 1; i < stepList.size(); i++)
-				for(int j=1;j<stepList.size();j++){
-				tmpField=stepList.get(i);
-				tmpField2=stepList.get(j);
-				if((canShortcut(tmpField,tmpField2,stepList))&&(tmpField.getType()==0)&&(tmpField2.getType()==0)){
-					
-					System.out.println(tmpField+" , "+tmpField2);
-					shortcut(tmpField,tmpField2,stepList);
-				}
-				}
-		
-	}
-
-	void shortenRight(List<Field> stepList) {
-
-		for (int i = 1; i < stepList.size(); i++) {
-			Field tmpField = stepList.get(i);
-			Field tmpField2 = getField(tmpField.getPositionX() + 1,
-					tmpField.getPositionY());
-
-			if (isOnList(tmpField2, stepList)) {
-				shortcut(tmpField, tmpField2, stepList);
-			}
-
-		}
-	}
-
-	
-	void shortenLeft(List<Field> stepList) {
-
-		for (int i = 1; i < stepList.size(); i++) {
-			Field tmpField = stepList.get(i);
-			Field tmpField2 = getField(tmpField.getPositionX() - 1,
-					tmpField.getPositionY());
-
-			if (isOnList(tmpField2, stepList)) {
-				shortcut(tmpField, tmpField2, stepList);
-			}
-
-		}
-	}
-
-	boolean canShortcut(Field field, Field field2, List<Field> stepList){
-		int ctr=0;
-		int diffX=field.getPositionX()-field2.getPositionX();
-		int diffY=field.getPositionY()-field2.getPositionY();
-		
-		if (diffX > 0) {
-			ctr=0;
-			for (int i = 1; i < SIZE_X - field.getPositionX(); i++) {
-				if (((isOnList(field, i - 1, 0, stepList)))
-						&& (getNextField(field, i, 0).getType() != 1)
-						&& (isOnList(getNextField(field, i, 0)) == false))
-					ctr++;
-			}
-			if (ctr == SIZE_X - field.getPositionX() - 1)
-				return true;
-		}
-		else if(diffX<0){
-			ctr=0;
-			for (int i = -1; i > SIZE_X - field.getPositionX(); i--) {
-				if (((isOnList(field, i+1, 0, stepList)))
-						&& (getNextField(field, i, 0).getType() != 1)
-						&& (isOnList(getNextField(field, i, 0)) == false))
-					ctr++;
-			}
-			if (ctr == SIZE_X - field.getPositionX() - 1)
-				return true;
-		}
-		else if(diffY>0){
-			ctr=0;
-			for (int i = 1; i < SIZE_Y - field.getPositionY(); i++) {
-				if (((isOnList(field, 0, i-1, stepList)))
-						&& (getNextField(field, 0, i).getType() != 1)
-						&& (isOnList(getNextField(field, 0, i)) == false))
-					ctr++;
-			}
-			if (ctr == SIZE_Y - field.getPositionY() - 1)
-				return true;
-		}
-		else if(diffY<0){
-			ctr=0;
-			for (int i = -1; i > SIZE_Y - field.getPositionY(); i++) {
-				if (((isOnList(field, 0, i+1, stepList)))
-						&& (getNextField(field, 0, i).getType() != 1)
-						&& (isOnList(getNextField(field, 0, i)) == false))
-					ctr++;
-			}
-			if (ctr == SIZE_Y - field.getPositionY() - 1)
-				return true;
-		}
-	return false;
-	}
-	
-	void shortenDown(List<Field> stepList) {
-
-		for (int i = 1; i < stepList.size(); i++) {
-			Field tmpField = stepList.get(i);
-			Field tmpField2 = getField(tmpField.getPositionX(),
-					tmpField.getPositionY() + 1);
-
-			if (isOnList(tmpField2, stepList)) {
-				shortcut(tmpField, tmpField2, stepList);
-			}
-
-		}
-	}
-
-	void shortenUp(List<Field> stepList) {
-
-		for (int i = 1; i < stepList.size(); i++) {
-			Field tmpField = stepList.get(i);
-			Field tmpField2 = getField(tmpField.getPositionX() + 1,
-					tmpField.getPositionY() - 1);
-
-			if (isOnList(tmpField2, stepList)) {
-				shortcut(tmpField, tmpField2, stepList);
-			}
-
-		}
-	}
-
-	void shortcut(Field field1, Field field2, List<Field> stepList) {
-		int shortcutStart = 0;
-		int shortcutFinish = 0;
-
-		for (int i = 0; i < stepList.size(); i++)
-			if (stepList.get(i) == field1)
-				shortcutStart = i;
-
-		for (int i = 0; i < stepList.size(); i++)
-			if (stepList.get(i) == field2)
-				shortcutFinish = i;
-
-		int shortcutDifference = shortcutFinish - shortcutStart;
-
-		if (shortcutDifference > 1)
-			for (int i = shortcutFinish-1; i >=shortcutStart+1 ; i--) {
-				//System.out.println("1");
-				stepList.remove(i);
-			}
-		else if (shortcutDifference < -1)
-			for (int i = shortcutStart; i > shortcutFinish; i--) {
-				//System.out.println("2");
-				stepList.remove(i);
-			}
-	}
-
-	
+//:INFO wybieranie najkrotszej drogi z listy drog	
 	List<Field> pickBestSolution() {
 
 		List<Field> bestSolution;
@@ -323,34 +145,16 @@ public class Solution {
 					bestSolution = this.solutionList.get(i);
 				}
 			}
-			
-		}else bestSolution=null;
+		}
+		else bestSolution=null;
 
 		return bestSolution;
 	}
 	
 
-	void drawBestSolution() {
-		if (this.solutionList.isEmpty() == false) {
-			List<Field> bestSolution = this.solutionList.get(0);
-			for (int i = 0; i < this.solutionList.size(); i++) {
-				if (this.solutionList.get(i).size() < bestSolution.size())
-					bestSolution = this.solutionList.get(i);
-			}
-			//makeGraphicRepresentation(getSolutionIndex(bestSolution));
-		}
-	}
-
-	int getSolutionIndex(List<Field> solution) {
-		for (int i = 0; i < this.solutionList.size(); i++) {
-			if (this.solutionList.get(i) == solution)
-				return i;
-		}
-		return -1;
-	}
-
+//:INFO inicjalizowanie labiryntu
 	Field[][] fillMaze() {
-
+		
 		for (int j = 1; j <= SIZE_Y; j++) {
 			for (int i = 1; i <= SIZE_X; i++) {
 				maze[i][j] = new Field(i, j, 0, 0);
@@ -359,6 +163,7 @@ public class Solution {
 		return maze;
 	}
 
+//:INFO metody do wczytywania z pliku
 	int findMaxX(String fileName) throws IOException {
 
 		int maxX = 0;
@@ -401,7 +206,6 @@ public class Solution {
 
 			if (nextChar == 13)
 				maxY = maxY + 1;
-
 		}
 		bufferedReader.close();
 		fileReader.close();
@@ -430,7 +234,6 @@ public class Solution {
 			nextChar = (char) nextInt;
 			nextInt = bufferedReader.read();
 
-
 			if (nextChar == 13) {
 				for (int counter = i; counter <= SIZE_X; counter++)
 					maze[counter][j] = new Field(counter, j, 0, 0);
@@ -449,7 +252,6 @@ public class Solution {
 
 				maze[i][j] = new Field(i, j, 0, type);
 				i++;
-
 			}
 		}
 		for (int counter = i; counter <= SIZE_X; counter++)
@@ -470,37 +272,11 @@ public class Solution {
 		return maze;
 	}
 
-	void setEntrance(int positionX, int positionY) {
-		getField(positionX, positionY).setType(-1);
-	}
 
-	void setExit(int positionX, int positionY) {
-		getField(positionX, positionY).setType(-2);
-	}
-
-	Field getEntrance() {
-
-		for (int j = 1; j <= SIZE_Y; j++) {
-			for (int i = 1; i <= SIZE_X; i++) {
-				if (getField(i, j).getType() == -1)
-					return getField(i, j);
-			}
-		}
-		return null;
-	}
-
-	Field getExit() {
-
-		for (int j = 1; j <= SIZE_Y; j++) {
-			for (int i = 1; i <= SIZE_X; i++) {
-				if (getField(i, j).getType() == -2)
-					return getField(i, j);
-			}
-		}
-		return null;
-	}
-
+	
+//:INFO pobieranie pola po wspolrzednych
 	Field getField(int positionX, int positionY) {
+		
 		if ((positionX > 0) && (positionX <= SIZE_X) && (positionY > 0)
 				&& (positionY <= SIZE_Y))
 			return maze[positionX][positionY];
@@ -508,29 +284,18 @@ public class Solution {
 			return null;
 	}
 
-	char mazeRepresentation(Field field) {
-		if (field == null)
-			return 'n';
-		if (field.getType() == 1)
-			return 'X';
-		if (field.getType() == 0)
-			return '.';
-		if (field.getType() == -1)
-			return 'p';
-		if (field.getType() == -2)
-			return 'k';
-		else
-			return '?';
 
-	}
-
+//:INFO metody do graficznego przedstawiania labiryntu
 	void makeGraphicRepresentation(List<Field> stepList) {
 
-		//List<Field> stepList = this.solutionList.get(index);
 		if(stepList!=null){
 		JFrame frame = new JFrame("solution");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(100 + 30 * SIZE_X, 100 + 30 * SIZE_Y);
+		
+		
+		if((SIZE_X>20)||(SIZE_Y>20))rectSize=10;
+		else rectSize=30;
+		frame.setSize(100 + rectSize * SIZE_X, 100 + rectSize * SIZE_Y);
 		frame.getContentPane().setLayout(null);
 
 		JPanel drawingPanel = new JPanel() {
@@ -560,20 +325,20 @@ public class Solution {
 						if (tmpField.getType() == -2)
 							g2d.setColor(Color.YELLOW);
 
-						g2d.fillRect(tmpField.getPositionX() * 30 - 25,
-								tmpField.getPositionY() * 30 - 25, 30, 30);
+						g2d.fillRect(tmpField.getPositionX() *rectSize - (rectSize-5),
+								tmpField.getPositionY() *rectSize - (rectSize-5), rectSize, rectSize);
 					}
 				}
 
 			}
 		};
-		drawingPanel.setBounds(0, 0, SIZE_X * 30 + 5, SIZE_Y * 30 + 5);
+		drawingPanel.setBounds(0, 0, SIZE_X * rectSize + 5, SIZE_Y * rectSize + 5);
 		frame.add(drawingPanel);
 
 		frame.setVisible(true);
 
 		JButton solverButton = new JButton("menu");
-		solverButton.setBounds(30 * SIZE_X, 25 + 30 * SIZE_Y, 75, 25);
+		solverButton.setBounds(rectSize * SIZE_X, 25 + rectSize * SIZE_Y, 75, 25);
 		frame.getContentPane().add(solverButton);
 
 		JFrame desc = drawDescription();
@@ -593,7 +358,7 @@ public class Solution {
 	class SolverButtonMouseAdapter extends MouseAdapter {
 	}
 
-	void drawError(){
+	void drawSolutionNotFoundError(){
 	JFrame errorFrame=new JFrame("error");
 	errorFrame.setSize(200, 100);
 	errorFrame.setLocation(100,100);
@@ -604,15 +369,53 @@ public class Solution {
 	error.setEditable(false);
 	errorFrame.getContentPane().add(error);
 	error.setText("nie znaleziono rozwiazania");
-	
+	errorFrame.setAlwaysOnTop(true);
 	errorFrame.setVisible(true);
+	}
+	
+	void drawMaxSizeError(){
+	JFrame errorFrame=new JFrame("error");
+	errorFrame.setSize(200, 100);
+	errorFrame.setLocation(100,100);
+
+	
+	JTextField error = new JTextField();
+	error.setBounds(110, 110, 75, 20);
+	error.setEditable(false);
+	errorFrame.getContentPane().add(error);
+	error.setText("ograniczono do maksimum");
+	errorFrame.setAlwaysOnTop(true);
+	errorFrame.setVisible(true);
+	}
+	
+	void drawFileNotFoundError(){
+	JFrame errorFrame=new JFrame("error");
+	errorFrame.setSize(200, 100);
+	errorFrame.setLocation(100,100);
+
+	
+	JTextField error = new JTextField();
+	error.setBounds(110, 110, 75, 20);
+	error.setEditable(false);
+	errorFrame.getContentPane().add(error);
+	error.setText("nie znaleziono pliku");
+	errorFrame.setAlwaysOnTop(true);
+	errorFrame.setVisible(true);
+	
+	errorFrame.addWindowListener(new WindowAdapter() {
+		public void windowClosing(WindowEvent windowEvent) {
+			errorFrame.dispose();
+			mazeSolver();
+		}
+	});
+	
 	}
 	
 	JFrame drawDescription() {
 
 		JFrame descFrame = new JFrame("description");
 		descFrame.setSize(150, 200);
-		descFrame.setLocation(100 + 30 * SIZE_X, 0);
+		descFrame.setLocation(100 + rectSize * SIZE_X, 0);
 
 		descFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -670,8 +473,8 @@ public class Solution {
 		return descFrame;
 	}
 
-	void printMaze(int index) {
-		
+//:INFO metody do tekstowego wyswietlania labiryntu
+	void printMaze(int index) {	
 		List<Field> stepList = this.solutionList.get(index);
 		
 		for (int j = 1; j <= SIZE_Y; j++) {
@@ -684,29 +487,22 @@ public class Solution {
 			System.out.print("\n");
 		}
 	}
-
-	void printMazeCounters() {
-		for (int j = 1; j <= SIZE_Y; j++) {
-			for (int i = 1; i <= SIZE_X; i++) {
-				System.out.print(getField(i, j).getCounter());
-			}
-			System.out.print("\n");
-		}
+	char mazeRepresentation(Field field) {
+		if (field == null)
+			return 'n';
+		if (field.getType() == 1)
+			return 'X';
+		if (field.getType() == 0)
+			return '.';
+		if (field.getType() == -1)
+			return 'p';
+		if (field.getType() == -2)
+			return 'k';
+		else
+			return '?';
 	}
 
-	void printMazeJunctions() {
-		for (int j = 1; j <= SIZE_Y; j++) {
-			for (int i = 1; i <= SIZE_X; i++) {
-				if (getField(i, j).getJunction() == true)
-					System.out.print('x');
-				else
-					System.out.print('.');
-			}
-			System.out.print("\n");
-		}
-	}
-
-
+	
 	void setRandomWalls(int number) {
 
 		Random random = new Random();
@@ -719,10 +515,11 @@ public class Solution {
 				r1 = random.nextInt(SIZE_X) + 1;
 				r2 = random.nextInt(SIZE_Y) + 1;
 			}
-			getField(r1, r2).setType(1); // 1-sciana
+			getField(r1, r2).setType(1);
 		}
 	}
-
+	
+//:INFO zliczanie ilosci sasiednich pustych pol
 	int countNearbyFields(Field field) {
 
 		int fieldCounter = 0;
@@ -757,15 +554,6 @@ public class Solution {
 		return fieldCounter;
 	}
 
-	Field makeNextFieldIfEmpty(Field field) {
-
-		Field nextField = getField(field.getPositionX() + 1, field.getPositionY());
-		if (nextField.getType() == 0)
-			return nextField;
-		else
-			return null;
-
-	}
 
 	boolean alreadyVisited(Field field) {
 		if (field.getCounter() > 0)
@@ -775,16 +563,13 @@ public class Solution {
 	}
 
 	boolean counterFull(Field field) {
-		
-		if (field.getCounter() == countNearbyFields(field)){
 
-			return true;
-		}
-		
-		else
-			return false;
+		if (field.getCounter() == countNearbyFields(field))return true;
+
+		else return false;
 	}
 
+//:INFO sprawdzanie czy moze wejsc na dane pole
 	boolean canMove(Field field) {
 		if ((field != null) && (alreadyVisited(field) == false)
 				&& (field.getType() != 1))
@@ -795,28 +580,18 @@ public class Solution {
 
 	Field getFieldNo(Field field,int number){
 		Field tmpField;
-
-		
+	
 		if(number==1)tmpField=getField(field.getPositionX()+1, field.getPositionY());
 		else if(number==2)tmpField=getField(field.getPositionX()-1, field.getPositionY());
 		else if(number==3)tmpField=getField(field.getPositionX(), field.getPositionY()+1);
 		else if(number==4)tmpField=getField(field.getPositionX(), field.getPositionY()-1);
 		else tmpField=field;
+
 		return tmpField;
 	}
 	
-	List<Integer> setOrder(){
-		
-		for (int i =1; i<=4; i++) {
-		    order.add(i);
-		}
-		Collections.shuffle(order);
-		
-		return order;
-	}
 	
-
-	
+//:INFO sprawdzanie czy moze sie ruszyc na sasiednie pola
 	Field changeField(Field field,List<Integer> order){
 		
 		Field nextField;
@@ -829,31 +604,6 @@ public class Solution {
 	return field;
 	}
 	
-	Field changeField2(Field field) {
-
-		Field nextField = getField(field.getPositionX() + 1, field.getPositionY());
-		if (canMove(nextField))
-			return nextField;
-		else {
-			nextField = getField(field.getPositionX(), field.getPositionY() + 1);
-			if (canMove(nextField))
-				return nextField;
-			else {
-				nextField = getField(field.getPositionX() - 1, field.getPositionY());
-				if (canMove(nextField))
-					return nextField;
-				else {
-					nextField = getField(field.getPositionX(),
-							field.getPositionY() - 1);
-					if (canMove(nextField))
-						return nextField;
-					else
-						return field;
-				}
-			}
-		}
-
-	}
 
 	Field moveBack(Field field) {
 		Field nextField = field;
@@ -862,22 +612,12 @@ public class Solution {
 			removeList(field);
 
 		nextField = getListTail();
-
 		return nextField;
 
 	}
 
-	Field moveBack2(Field field) {
-		Field nextField;
-
-		if ((counterFull(field)) && (getListSize() > 1)) {
-			removeList(field);
-			nextField = getListTail();
-			moveBack(nextField);
-		}
-		return field;
-	}
-
+	
+//:INFO glowna metoda
 	void move(Field field) {
 
 		if ((field.getType() != -2) && (counterFull(field) == false)) {
@@ -893,10 +633,6 @@ public class Solution {
 			} else {
 				nextField = moveBack(field);
 				
-				//for(int i=0;i<getListSize();i++){
-				 //nextField=moveBack(nextField);
-				 //}
-				// :TODO tu zmiana powyzej
 				if (nextField != field)
 					move(nextField);
 			}
@@ -914,16 +650,6 @@ public class Solution {
 
 	}
 
-	void printAllXY() { // :INFO ta metoda do testow jest tylko
-		for (int j = 1; j <= SIZE_Y; j++) {
-			for (int i = 1; i <= SIZE_X; i++) {
-				System.out.print(getField(i, j).getPositionX() + ","
-						+ getField(i, j).getPositionY() + "|");
-			}
-			System.out.print("\n");
-		}
-	}
-
 	void clearMaze() {
 		for (int j = 1; j <= SIZE_Y; j++) {
 			for (int i = 1; i <= SIZE_X; i++) {
@@ -931,15 +657,25 @@ public class Solution {
 			}
 		}
 	}
+	
 	//:INFO mazeSolver
-	void solveMaze(int sizeX, int sizeY, int wallCount) {
+	void solveMaze(int sizeX, int sizeY, int wallCount,int entranceX,int entranceY,int exitX,int exitY) {
+		
+		if((sizeX>30)||(sizeY>30)||(wallCount>sizeX*sizeY)){
+			drawMaxSizeError();
+		
+			if(sizeX>30)sizeX=30;
+			if(sizeY>30)sizeY=30;
+			if(wallCount>sizeX*sizeY)wallCount=sizeX*sizeY;
+		}
+		
 		setSizeX(sizeX);
 		setSizeY(sizeY);
 		setMazeSize();
 		fillMaze();
 		setRandomWalls(wallCount);
-		setEntrance(1, 1);
-		setExit(SIZE_X, SIZE_Y);
+		setEntrance(entranceX,entranceY);
+		setExit(exitX,exitY);
 
 		setOrder();
 		for(int i=0;i<100;i++){
@@ -955,9 +691,7 @@ public class Solution {
 			List<Field> newList=new LinkedList<Field>();
 			newList.add(getEntrance());
 			makeGraphicRepresentation(newList);
-			drawError();
-			//solveMaze(sizeX,sizeY,wallCount);
-			//mazeSolver();
+			drawSolutionNotFoundError();
 		} else
 			makeGraphicRepresentation(pickBestSolution());
 
@@ -965,6 +699,7 @@ public class Solution {
 
 	void solveMaze(String fileName) {
 		try {
+			
 			setMazeSize();
 			fillMaze();
 			readMazeFromFile(fileName);
@@ -982,13 +717,12 @@ public class Solution {
 				List<Field> newList=new LinkedList<Field>();
 				newList.add(getEntrance());
 				makeGraphicRepresentation(newList);
-				drawError();
-				//mazeSolver();
+				drawSolutionNotFoundError();
 			} else
 				makeGraphicRepresentation(pickBestSolution());
 
 		} catch (IOException e) {
-			System.err.println("file not found");
+			drawFileNotFoundError();
 		}
 	}
 
@@ -1000,35 +734,66 @@ public class Solution {
 		frame.getContentPane().setLayout(null);
 
 		JLabel sizeX = new JLabel();
-		sizeX.setBounds(25, 50, 150, 25);
+		sizeX.setBounds(5, 30, 150, 25);
 		frame.getContentPane().add(sizeX);
-		sizeX.setText("szerokosc labiryntu");
+		sizeX.setText("szerokosc labiryntu (2-30)");
 
 		JLabel sizeY = new JLabel();
-		sizeY.setBounds(25, 100, 150, 25);
+		sizeY.setBounds(5, 60, 150, 25);
 		frame.getContentPane().add(sizeY);
-		sizeY.setText("dlugosc labiryntu");
+		sizeY.setText("dlugosc labiryntu (2-30)");
 
 		JLabel wallCount = new JLabel();
-		wallCount.setBounds(25, 150, 150, 25);
+		wallCount.setBounds(5, 90, 150, 25);
 		frame.getContentPane().add(wallCount);
 		wallCount.setText("ilosc scian");
+		
+		JLabel entranceXY = new JLabel();
+		entranceXY.setBounds(5, 120, 150, 25);
+		frame.getContentPane().add(entranceXY);
+		entranceXY.setText("wspolrzedne wejscia");
+
+		JLabel exitXY = new JLabel();
+		exitXY.setBounds(5, 150, 150, 25);
+		frame.getContentPane().add(exitXY);
+		exitXY.setText("wspolrzedne wyjscia");
 
 		JTextField sizeXField = new JTextField();
-		sizeXField.setBounds(150, 50, 75, 25);
+		sizeXField.setBounds(160, 30, 50, 25);
 		frame.getContentPane().add(sizeXField);
 		sizeXField.setText("10");
 
 		JTextField sizeYField = new JTextField();
-		sizeYField.setBounds(150, 100, 75, 25);
+		sizeYField.setBounds(160, 60, 50, 25);
 		frame.getContentPane().add(sizeYField);
 		sizeYField.setText("10");
 
 		JTextField wallCountField = new JTextField();
-		wallCountField.setBounds(150, 150, 75, 25);
+		wallCountField.setBounds(160, 90, 50, 25);
 		frame.getContentPane().add(wallCountField);
 		wallCountField.setText("25");
 
+		JTextField entranceXField = new JTextField();
+		entranceXField.setBounds(160, 120, 25, 25);
+		frame.getContentPane().add(entranceXField);
+		entranceXField.setText("1");
+
+		JTextField entranceYField = new JTextField();
+		entranceYField.setBounds(190, 120, 25, 25);
+		frame.getContentPane().add(entranceYField);
+		entranceYField.setText("1");
+		
+		JTextField exitXField = new JTextField();
+		exitXField.setBounds(160, 150, 25, 25);
+		frame.getContentPane().add(exitXField);
+		exitXField.setText(sizeXField.getText());
+
+		JTextField exitYField = new JTextField();
+		exitYField.setBounds(190, 150, 25, 25);
+		frame.getContentPane().add(exitYField);
+		exitYField.setText(sizeYField.getText());
+		
+		
 		JButton solveGeneratedButton = new JButton("wygeneruj i rozwiaz");
 		solveGeneratedButton.setBounds(75, 200, 150, 25);
 		frame.getContentPane().add(solveGeneratedButton);
@@ -1040,11 +805,19 @@ public class Solution {
 						String getValue1 = sizeXField.getText();
 						String getValue2 = sizeYField.getText();
 						String getValue3 = wallCountField.getText();
-
+						String getValue4 = entranceXField.getText();
+						String getValue5 = entranceYField.getText();
+						String getValue6 = exitXField.getText();
+						String getValue7 = exitYField.getText();
+						
 						frame.dispose();
 						solveMaze(Integer.parseInt(getValue1),
 								Integer.parseInt(getValue2),
-								Integer.parseInt(getValue3));
+								Integer.parseInt(getValue3),
+								Integer.parseInt(getValue4),
+								Integer.parseInt(getValue5),
+								Integer.parseInt(getValue6),
+								Integer.parseInt(getValue7));
 					}
 				});
 
@@ -1089,12 +862,7 @@ public class Solution {
 
 	public static void main(String[] args) {
 		Solution s1 = new Solution();
-		// Solution s2= new Solution();
 		s1.mazeSolver();
-		// s1.solveMaze("maze.txt");
-
-		// s2.solveMaze(4,5,2);
-
 	}
 
 }
